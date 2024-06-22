@@ -4,12 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Push Notification Demo</title>
-
+<!-- Bootstrap CSS -->
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<!-- Custom CSS -->
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .container {
+        margin-top: 50px;
+        text-align: center;
+    }
+    .btn-custom {
+        width: 250px;
+        font-size: 18px;
+        margin: 10px 0;
+    }
+</style>
 </head>
 <body>
-<h1>Push Notification Demo</h1>
-<button id="subscribe">Subscribe to Notifications</button>
-<button id="unsubscribe" disabled>Unsubscribe from Notifications</button>
+<div class="container">
+    <h1 class="display-4">Push Notification 1 device only</h1>
+    <button id="subscribe" class="btn btn-primary btn-custom">Subscribe to Notifications</button>
+    <button id="unsubscribe" class="btn btn-danger btn-custom" disabled>Unsubscribe from Notifications</button>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Your custom script -->
 <script src="app.js"></script>
 </body>
 </html>
