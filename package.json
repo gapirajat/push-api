@@ -10,9 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vercel/kv": "^2.0.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "to": "^0.2.9",
     "vercel": "^34.2.7",
     "web-push": "^3.6.7"
   }

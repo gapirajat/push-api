@@ -5,6 +5,7 @@ const app = express();
 const port = 3000;
 const cors = require("cors");
 
+
 // Allow all domains
 app.use(cors());
 
@@ -40,29 +41,95 @@ app.get("/vapidPublicKey", (req, res) => {
 });
 
 // Subscribe Route
-app.post("/subscribe", (req, res) => {
-  subscription = req.body;
+app.post("/subscribe",async (req, res) => {
+    console.log(typeof(req.body));
+    // console.log(JSON.stringify(req.body).replace(/\s+/g, ''));
+    fetch(`https://adapted-firefly-48360.upstash.io`, {
+        headers: {
+          Authorization: "Bearer AbzoAAIncDE5MjhkNzJjOGIyNWE0YzQyYjQwMWE0N2ZjMDRmOWM2MXAxNDgzNjA"
+        },
+        body: `["SET", "sessionData", "${req.body}"]`,
+        method: 'POST',
+      }).then(response => response.json())
+        .then(data => console.log(data));  
+    const response = await fetch(`https://adapted-firefly-48360.upstash.io/get/user_1_session/`, {
+        headers: {
+            Authorization: "Bearer AbzoAAIncDE5MjhkNzJjOGIyNWE0YzQyYjQwMWE0N2ZjMDRmOWM2MXAxNDgzNjA"
+        }
+        });
+    const data = await response.json();    
+    subscription = stringToObject(data.result);
 
   res.status(201).json({});
 
   const payload = JSON.stringify({ title: "Test Push Notification" });
 
-  webpush
-    .sendNotification(subscription, payload)
-    .catch((error) => console.error(error));
+
+// Call the function to send the notification
+await sendWebPushNotification(subscription, payload);
 });
+
+const stringToObject = (str) => {
+    try {
+        return (new Function('return ' + str))();
+    } catch (error) {
+        console.error('Error converting string to object:', error);
+        return null;
+    }
+};
+
+async function sendWebPushNotification(subscriptio, payload) {
+    if (subscriptio) {
+      try {
+        let res;
+        const result = await webpush.sendNotification(subscriptio, payload);
+        return result
+        console.log('Notification sent successfully');
+    } catch (error) {
+        console.error('Error sending notification:', error);
+    }
+    }
+
+}
+
+async function redis() {
+    const url = 'https://adapted-firefly-48360.upstash.io/get/user_1_session/';
+    const token = 'AbzoAAIncDE5MjhkNzJjOGIyNWE0YzQyYjQwMWE0N2ZjMDRmOWM2MXAxNDgzNjA';
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Error fetching data:', response.status, response.statusText);
+            return null;
+        }
+
+        const data = await response.json();
+        const sub = stringToObject(data.result);
+
+        return sub;
+    } catch (error) {
+        console.error('Error fetching subscription:', error);
+        return null;
+    }
+};
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
-app.post("/send", (req, res) => {
+app.post("/send",async (req, res) => {
   console.log(req.body);
   const payload = JSON.stringify({
     title: req.body.name + " - " + req.body.contact,
-    body: req.body.text,
+    body: "email:" + req.body.email + " - " + req.body.text,
   });
 
   // Check if there is a subscription object stored
   if (subscription) {
+    console.log('hi')
     webpush
       .sendNotification(subscription, payload)
       .then((result) =>
@@ -75,7 +142,18 @@ app.post("/send", (req, res) => {
         res.sendStatus(500);
       });
   } else {
-    res.status(404).send("No subscription available.");
+    console.log('hi2');
+    subscription = await redis();
+    if (subscription) {
+        console.log('h3i')
+        console.log(await subscription);
+        const result = await sendWebPushNotification(subscription, payload)
+        res.status(200).json({ message: "Notification sent successfully", result });
+    }
+    else{
+            res.status(404).send("No subscription available.");
+    }
+
   }
 });
 
